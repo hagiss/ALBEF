@@ -1,7 +1,7 @@
-train_file:  ['data/coco_train.json']
-val_file: 'data/coco_val.json'                
-test_file: 'data/coco_test.json'
-image_root: '/export/share/datasets/vision/coco/images/'
+train_file:  ['/workspace/data/coco_train.json']
+val_file: '/workspace/data/coco_val.json'
+test_file: '/workspace/data/coco_test.json'
+image_root: '/workspace/coco'
 
 bert_config: 'configs/config_bert.json'
 
@@ -22,10 +22,3 @@ warm_up: True
 
 optimizer: {opt: adamW, lr: 1e-5, weight_decay: 0.02}
 schedular: {sched: cosine, lr: 1e-5, epochs: 5, min_lr: 1e-6, decay_rate: 1, warmup_lr: 1e-5, warmup_epochs: 1, cooldown_epochs: 0}
-
-
-
-
-
-
-
