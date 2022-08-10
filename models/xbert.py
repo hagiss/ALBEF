@@ -739,7 +739,6 @@ class BertPreTrainedModel(PreTrainedModel):
             module.bias.data.zero_()
 
 
-@dataclass
 class BertForPreTrainingOutput(ModelOutput):
     """
     Output type of :class:`~transformers.BertForPreTraining`.
@@ -826,10 +825,7 @@ BERT_INPUTS_DOCSTRING = r"""
 """
 
 
-@add_start_docstrings(
-    "The bare Bert Model transformer outputting raw hidden-states without any specific head on top.",
-    BERT_START_DOCSTRING,
-)
+
 class BertModel(BertPreTrainedModel):
     """
     The model can behave as an encoder (with only self-attention) as well as a decoder, in which case a layer of
@@ -1073,13 +1069,6 @@ class BertModel(BertPreTrainedModel):
         )
 
 
-@add_start_docstrings(
-    """
-    Bert Model with two heads on top as done during the pretraining: a `masked language modeling` head and a `next
-    sentence prediction (classification)` head.
-    """,
-    BERT_START_DOCSTRING,
-)
 class BertForPreTraining(BertPreTrainedModel):
     def __init__(self, config):
         super().__init__(config)
@@ -1095,8 +1084,6 @@ class BertForPreTraining(BertPreTrainedModel):
     def set_output_embeddings(self, new_embeddings):
         self.cls.predictions.decoder = new_embeddings
 
-    @add_start_docstrings_to_model_forward(BERT_INPUTS_DOCSTRING.format("batch_size, sequence_length"))
-    @replace_return_docstrings(output_type=BertForPreTrainingOutput, config_class=_CONFIG_FOR_DOC)
     def forward(
         self,
         input_ids=None,
@@ -1171,9 +1158,6 @@ class BertForPreTraining(BertPreTrainedModel):
         )
 
 
-@add_start_docstrings(
-    """Bert Model with a `language modeling` head on top for CLM fine-tuning. """, BERT_START_DOCSTRING
-)
 class BertLMHeadModel(BertPreTrainedModel):
 
     _keys_to_ignore_on_load_unexpected = [r"pooler"]
@@ -1193,8 +1177,6 @@ class BertLMHeadModel(BertPreTrainedModel):
     def set_output_embeddings(self, new_embeddings):
         self.cls.predictions.decoder = new_embeddings
 
-    @add_start_docstrings_to_model_forward(BERT_INPUTS_DOCSTRING.format("batch_size, sequence_length"))
-    @replace_return_docstrings(output_type=CausalLMOutputWithCrossAttentions, config_class=_CONFIG_FOR_DOC)
     def forward(
         self,
         input_ids=None,
@@ -1331,7 +1313,6 @@ class BertLMHeadModel(BertPreTrainedModel):
         return reordered_past
 
 
-@add_start_docstrings("""Bert Model with a `language modeling` head on top. """, BERT_START_DOCSTRING)
 class BertForMaskedLM(BertPreTrainedModel):
 
     _keys_to_ignore_on_load_unexpected = [r"pooler"]
@@ -1351,13 +1332,6 @@ class BertForMaskedLM(BertPreTrainedModel):
     def set_output_embeddings(self, new_embeddings):
         self.cls.predictions.decoder = new_embeddings
 
-    @add_start_docstrings_to_model_forward(BERT_INPUTS_DOCSTRING.format("batch_size, sequence_length"))
-    @add_code_sample_docstrings(
-        tokenizer_class=_TOKENIZER_FOR_DOC,
-        checkpoint="bert-base-uncased",
-        output_type=MaskedLMOutput,
-        config_class=_CONFIG_FOR_DOC,
-    )
     def forward(
         self,
         input_ids=None,
@@ -1447,10 +1421,6 @@ class BertForMaskedLM(BertPreTrainedModel):
         return {"input_ids": input_ids, "attention_mask": attention_mask}
 
 
-@add_start_docstrings(
-    """Bert Model with a `next sentence prediction (classification)` head on top. """,
-    BERT_START_DOCSTRING,
-)
 class BertForNextSentencePrediction(BertPreTrainedModel):
     def __init__(self, config):
         super().__init__(config)
@@ -1460,8 +1430,6 @@ class BertForNextSentencePrediction(BertPreTrainedModel):
 
         self.init_weights()
 
-    @add_start_docstrings_to_model_forward(BERT_INPUTS_DOCSTRING.format("batch_size, sequence_length"))
-    @replace_return_docstrings(output_type=NextSentencePredictorOutput, config_class=_CONFIG_FOR_DOC)
     def forward(
         self,
         input_ids=None,
@@ -1538,13 +1506,6 @@ class BertForNextSentencePrediction(BertPreTrainedModel):
         )
 
 
-@add_start_docstrings(
-    """
-    Bert Model transformer with a sequence classification/regression head on top (a linear layer on top of the pooled
-    output) e.g. for GLUE tasks.
-    """,
-    BERT_START_DOCSTRING,
-)
 class BertForSequenceClassification(BertPreTrainedModel):
     def __init__(self, config):
         super().__init__(config)
@@ -1556,13 +1517,6 @@ class BertForSequenceClassification(BertPreTrainedModel):
 
         self.init_weights()
 
-    @add_start_docstrings_to_model_forward(BERT_INPUTS_DOCSTRING.format("batch_size, sequence_length"))
-    @add_code_sample_docstrings(
-        tokenizer_class=_TOKENIZER_FOR_DOC,
-        checkpoint="bert-base-uncased",
-        output_type=SequenceClassifierOutput,
-        config_class=_CONFIG_FOR_DOC,
-    )
     def forward(
         self,
         input_ids=None,
@@ -1623,13 +1577,6 @@ class BertForSequenceClassification(BertPreTrainedModel):
         )
 
 
-@add_start_docstrings(
-    """
-    Bert Model with a multiple choice classification head on top (a linear layer on top of the pooled output and a
-    softmax) e.g. for RocStories/SWAG tasks.
-    """,
-    BERT_START_DOCSTRING,
-)
 class BertForMultipleChoice(BertPreTrainedModel):
     def __init__(self, config):
         super().__init__(config)
@@ -1640,13 +1587,7 @@ class BertForMultipleChoice(BertPreTrainedModel):
 
         self.init_weights()
 
-    @add_start_docstrings_to_model_forward(BERT_INPUTS_DOCSTRING.format("batch_size, num_choices, sequence_length"))
-    @add_code_sample_docstrings(
-        tokenizer_class=_TOKENIZER_FOR_DOC,
-        checkpoint="bert-base-uncased",
-        output_type=MultipleChoiceModelOutput,
-        config_class=_CONFIG_FOR_DOC,
-    )
+
     def forward(
         self,
         input_ids=None,
@@ -1714,13 +1655,6 @@ class BertForMultipleChoice(BertPreTrainedModel):
         )
 
 
-@add_start_docstrings(
-    """
-    Bert Model with a token classification head on top (a linear layer on top of the hidden-states output) e.g. for
-    Named-Entity-Recognition (NER) tasks.
-    """,
-    BERT_START_DOCSTRING,
-)
 class BertForTokenClassification(BertPreTrainedModel):
 
     _keys_to_ignore_on_load_unexpected = [r"pooler"]
@@ -1735,13 +1669,6 @@ class BertForTokenClassification(BertPreTrainedModel):
 
         self.init_weights()
 
-    @add_start_docstrings_to_model_forward(BERT_INPUTS_DOCSTRING.format("batch_size, sequence_length"))
-    @add_code_sample_docstrings(
-        tokenizer_class=_TOKENIZER_FOR_DOC,
-        checkpoint="bert-base-uncased",
-        output_type=TokenClassifierOutput,
-        config_class=_CONFIG_FOR_DOC,
-    )
     def forward(
         self,
         input_ids=None,
@@ -1805,13 +1732,6 @@ class BertForTokenClassification(BertPreTrainedModel):
         )
 
 
-@add_start_docstrings(
-    """
-    Bert Model with a span classification head on top for extractive question-answering tasks like SQuAD (a linear
-    layers on top of the hidden-states output to compute `span start logits` and `span end logits`).
-    """,
-    BERT_START_DOCSTRING,
-)
 class BertForQuestionAnswering(BertPreTrainedModel):
 
     _keys_to_ignore_on_load_unexpected = [r"pooler"]
@@ -1825,13 +1745,6 @@ class BertForQuestionAnswering(BertPreTrainedModel):
 
         self.init_weights()
 
-    @add_start_docstrings_to_model_forward(BERT_INPUTS_DOCSTRING.format("batch_size, sequence_length"))
-    @add_code_sample_docstrings(
-        tokenizer_class=_TOKENIZER_FOR_DOC,
-        checkpoint="bert-base-uncased",
-        output_type=QuestionAnsweringModelOutput,
-        config_class=_CONFIG_FOR_DOC,
-    )
     def forward(
         self,
         input_ids=None,
