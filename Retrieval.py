@@ -218,7 +218,48 @@ def itm_eval(scores_i2t, scores_t2i, txt2img, img2txt):
                     'r_mean': r_mean}
     return eval_result
 
+def rank_image(output, target, topk=(1,)):
+    with torch.no_grad():
+        maxk = max(topk)
+        batch_size = target.size(0)
+        _, pred = output.topk(maxk, 1, True, True)
+        pred = pred.t() // 5
 
+        correct = pred.eq(target.reshape(1, -1).expand_as(pred))
+        res = []
+        for k in topk:
+            correct_k = correct[:k].t()
+            correct_k = correct_k.sum(1, keepdim=True)
+            correct_k = (correct_k > 0).float().sum(0, keepdim=True)
+            res.append(correct_k.mul_(100.0 / batch_size))
+        return res
+
+def rank_text(output, target, topk=(1,)):
+    with torch.no_grad():
+        maxk = max(topk)
+        batch_size = target.size(0)
+        _, pred = output.topk(maxk, 1, True, True)
+        pred = pred.t()
+        target = target // 5
+
+        correct = pred.eq(target.reshape(1, -1).expand_as(pred))
+        res = []
+        for k in topk:
+            correct_k = correct[:k].t()
+            correct_k = correct_k.sum(1, keepdim=True)
+            correct_k = (correct_k > 0).float().sum(0, keepdim=True)
+            res.append(correct_k.mul_(100.0 / batch_size))
+        return res
+
+def rank(score_i2t, score_t2i):
+    labels = torch.arange(score_i2t.shape[0]).cuda(non_blocking=True)
+    text_labels = torch.arange(score_t2i.shape[0]).cuda(non_blocking=True)
+
+    r1, r5, r10 = rank_image(score_i2t, labels, topk=(1, 5, 10))
+    rt1, rt5, rt10 = rank_text(score_t2i, text_labels, topk=(1, 5, 10))
+
+    print(f"R1: {r1}, R5: {r5}, R10: {r10}")
+    print(f"RT1: {rt1}, RT5: {rt5}, RT10: {rt10}")
 
 
 def main(args, config):
@@ -307,10 +348,12 @@ def main(args, config):
     
         if utils.is_main_process():  
       
-            val_result = itm_eval(score_val_i2t, score_val_t2i, val_loader.dataset.txt2img, val_loader.dataset.img2txt)  
-            print(val_result)
-            test_result = itm_eval(score_test_i2t, score_test_t2i, test_loader.dataset.txt2img, test_loader.dataset.img2txt)    
-            print(test_result)
+            # val_result = itm_eval(score_val_i2t, score_val_t2i, val_loader.dataset.txt2img, val_loader.dataset.img2txt)
+            # print(val_result)
+            # test_result = itm_eval(score_test_i2t, score_test_t2i, test_loader.dataset.txt2img, test_loader.dataset.img2txt)
+            # print(test_result)
+            rank(score_val_i2t, score_val_t2i)
+            rank(score_test_i2t, score_test_t2i)
             
             if args.evaluate:                
                 log_stats = {**{f'val_{k}': v for k, v in val_result.items()},
