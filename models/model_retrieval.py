@@ -57,7 +57,30 @@ class ALBEF(nn.Module):
 
         self.image_queue = nn.functional.normalize(self.image_queue, dim=0)
         self.text_queue = nn.functional.normalize(self.text_queue, dim=0)
-        
+
+    def forward_image_text(self, image, text):
+        image_embeds = self.visual_encoder(image)
+        image_atts = torch.ones(image_embeds.size()[:-1], dtype=torch.long).to(image.device)
+
+        text_output = self.text_encoder(text.input_ids, attention_mask=text.attention_mask,
+                                        return_dict=True, mode='text')
+        text_embeds = text_output.last_hidden_state
+
+        output_pos = self.text_encoder(encoder_embeds=text_embeds,
+                                       attention_mask=text.attention_mask,
+                                       encoder_hidden_states=image_embeds,
+                                       encoder_attention_mask=image_atts,
+                                       return_dict=True,
+                                       mode='fusion',
+                                       )
+        text_embeds = output_pos.last_hidden_state
+        return image_embeds, self.mean_pooling(text_embeds, text.attention_mask)
+
+    def mean_pooling(self, text_embeds, attention_mask):
+        text_embeds = text_embeds[:, 1:, :]
+        attention_mask = attention_mask[:, 1:]
+        input_mask_expanded = attention_mask.unsqueeze(-1).expand(text_embeds.size()).float()
+        return torch.sum(text_embeds * input_mask_expanded, 1) / torch.clamp(input_mask_expanded.sum(1), min=1e-9)
 
     def forward(self, image, text, alpha, idx):
         

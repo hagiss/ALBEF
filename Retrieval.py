@@ -167,7 +167,7 @@ def evaluation(model, data_loader, tokenizer, device, config):
     total_time_str = str(datetime.timedelta(seconds=int(total_time)))
     print('Evaluation time {}'.format(total_time_str)) 
 
-    return score_matrix_i2t.cpu().numpy(), score_matrix_t2i.cpu().numpy()
+    return score_matrix_i2t, score_matrix_t2i
 
 
             
@@ -323,7 +323,7 @@ def main(args, config):
     model_without_ddp = model
     if args.distributed:
         model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[args.gpu])
-        model_without_ddp = model.module   
+        model_without_ddp = model.module
     
     arg_opt = utils.AttrDict(config['optimizer'])
     optimizer = create_optimizer(arg_opt, model)
@@ -344,7 +344,7 @@ def main(args, config):
             train_stats = train(model, train_loader, optimizer, tokenizer, epoch, warmup_steps, device, lr_scheduler, config)  
             
         score_val_i2t, score_val_t2i, = evaluation(model_without_ddp, val_loader, tokenizer, device, config)
-        score_test_i2t, score_test_t2i = evaluation(model_without_ddp, test_loader, tokenizer, device, config)
+        # score_test_i2t, score_test_t2i = evaluation(model_without_ddp, test_loader, tokenizer, device, config)
     
         if utils.is_main_process():  
       
@@ -353,7 +353,7 @@ def main(args, config):
             # test_result = itm_eval(score_test_i2t, score_test_t2i, test_loader.dataset.txt2img, test_loader.dataset.img2txt)
             # print(test_result)
             rank(score_val_i2t, score_val_t2i)
-            rank(score_test_i2t, score_test_t2i)
+            # rank(score_test_i2t, score_test_t2i)
             
             if args.evaluate:                
                 log_stats = {**{f'val_{k}': v for k, v in val_result.items()},
